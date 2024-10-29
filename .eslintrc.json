@@ -1,0 +1,22 @@
+{
+  "extends": [
+    "airbnb",
+    "airbnb/hooks",
+    "plugin:react/jsx-runtime",
+    "plugin:jsx-a11y/recommended",
+    "next/core-web-vitals",
+    "next/typescript"
+  ],
+  "parser": "@typescript-eslint/parser",
+  "ignorePatterns": [
+    "/src/components/ui",
+    "/src/hooks/use-toast.ts"
+  ],
+  "rules": {
+    "import/extensions": "off",
+    "no-underscore-dangle": "off",
+    "react/require-default-props": "off",
+    "import/prefer-default-export": "off",
+    "react/jsx-filename-extension": [1, { "extensions": [".js", ".jsx", ".ts", ".tsx"] }]
+  }
+}
