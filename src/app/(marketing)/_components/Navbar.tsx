@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { SignedIn, SignedOut, SignInButton } from '@clerk/nextjs';
 import BrandLogo from '@/components/Brand-logo';
 
 function Navbar() {
@@ -21,9 +22,14 @@ function Navbar() {
           About
         </Link>
 
-        <Link className="text-lg" href="/">
-          Login
-        </Link>
+        <span className="text-lg">
+          <SignedOut>
+            <SignInButton>Login</SignInButton>
+          </SignedOut>
+          <SignedIn>
+            <Link href="/">Dashboard</Link>
+          </SignedIn>
+        </span>
       </nav>
     </header>
   );
