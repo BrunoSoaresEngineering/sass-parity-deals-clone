@@ -3,7 +3,7 @@ import Navbar from './_components/Navbar';
 
 function layout({ children }: { children: ReactNode }) {
   return (
-    <div>
+    <div className="selection:bg-[hsl(320,65%,52%,20%)]">
       <Navbar />
       {children}
     </div>
