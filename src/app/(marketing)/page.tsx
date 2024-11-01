@@ -1,10 +1,12 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import { subscriptionTiersInOrder } from '@/data/subscription-tiers';
 import { cn } from '@/lib/utils';
 import { SignUpButton } from '@clerk/nextjs';
 import { ArrowRightIcon } from 'lucide-react';
 import Neon from './_icons/Neon';
 import ClerkIcon from './_icons/Clerk';
+import PricingCard from './_components/Pricing-card';
 
 function page() {
   return (
@@ -72,6 +74,28 @@ function page() {
           <Link href="https://neon.tech" className="md:max-xl:hidden">
             <ClerkIcon />
           </Link>
+        </div>
+      </section>
+
+      <section className="px-8 py-16 bg-accent/5">
+        <h2 className="text-4xl font-semibold text-center text-balance pb-8">
+          Pricing software which pays for itself 20x over
+        </h2>
+
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 max-w-screen-xl">
+          {subscriptionTiersInOrder.map((subscriptionTier) => (
+            <PricingCard
+              key={subscriptionTier.name}
+              name={subscriptionTier.name}
+              priceInCents={subscriptionTier.priceInCents}
+              maxNumberOfProducts={subscriptionTier.maxNumberOfProducts}
+              maxNumberOfVisits={subscriptionTier.maxNumberOfVisits}
+              canAccessAnalytics={subscriptionTier.canAccessAnalytics}
+              canCustomizeBanner={subscriptionTier.canCustomizeBanner}
+              canRemoveBranding={subscriptionTier.canCustomizeBanner}
+              isMostPopular={subscriptionTier.name === 'Standard'}
+            />
+          ))}
         </div>
       </section>
     </>
