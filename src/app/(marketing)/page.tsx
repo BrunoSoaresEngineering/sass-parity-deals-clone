@@ -1,7 +1,10 @@
+import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { SignUpButton } from '@clerk/nextjs';
 import { ArrowRightIcon } from 'lucide-react';
+import Neon from './_icons/Neon';
+import ClerkIcon from './_icons/Clerk';
 
 function page() {
   return (
@@ -29,7 +32,48 @@ function page() {
         </SignUpButton>
       </section>
 
-      <section />
+      <section
+        className={cn(
+          'bg-primary text-primary-foreground',
+          'px-8 md:px-16 py-16 flex flex-col gap-16 container',
+        )}
+      >
+        <h2 className="text-3xl text-center text-balance">
+          Trusted by top modern companies
+        </h2>
+        <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-16">
+          <Link href="https://neon.tech">
+            <Neon />
+          </Link>
+          <Link href="https://neon.tech">
+            <ClerkIcon />
+          </Link>
+          <Link href="https://neon.tech">
+            <Neon />
+          </Link>
+          <Link href="https://neon.tech">
+            <ClerkIcon />
+          </Link>
+          <Link href="https://neon.tech">
+            <Neon />
+          </Link>
+          <Link href="https://neon.tech">
+            <ClerkIcon />
+          </Link>
+          <Link href="https://neon.tech">
+            <Neon />
+          </Link>
+          <Link href="https://neon.tech">
+            <ClerkIcon />
+          </Link>
+          <Link href="https://neon.tech">
+            <Neon />
+          </Link>
+          <Link href="https://neon.tech" className="md:max-xl:hidden">
+            <ClerkIcon />
+          </Link>
+        </div>
+      </section>
     </>
   );
 }
