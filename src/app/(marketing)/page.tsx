@@ -4,9 +4,11 @@ import { subscriptionTiersInOrder } from '@/data/subscription-tiers';
 import { cn } from '@/lib/utils';
 import { SignUpButton } from '@clerk/nextjs';
 import { ArrowRightIcon } from 'lucide-react';
+import BrandLogo from '@/components/Brand-logo';
 import Neon from './_icons/Neon';
 import ClerkIcon from './_icons/Clerk';
 import PricingCard from './_components/Pricing-card';
+import FooterLinkGroup from './_components/Footer-link-group';
 
 function page() {
   return (
@@ -98,6 +100,84 @@ function page() {
           ))}
         </div>
       </section>
+
+      <footer className="container pt-16 pb-8 flex flex-col sm:flex-row gap-8 justify-between items-start">
+        <Link href="/">
+          <BrandLogo />
+        </Link>
+
+        <div className="flex flex-col sm:flex-row gap-8">
+          <div className="flex flex-col gap-8">
+            <FooterLinkGroup
+              title="Help"
+              links={[
+                { label: 'PPP Discounts', href: '#' },
+                { label: 'Discount API', href: '#' },
+              ]}
+            />
+
+            <FooterLinkGroup
+              title="Solutions"
+              links={[
+                { label: 'Newsletter', href: '#' },
+                { label: 'SaaS Business', href: '#' },
+                { label: 'Online Courses', href: '#' },
+              ]}
+            />
+          </div>
+
+          <div className="flex flex-col gap-8">
+            <FooterLinkGroup
+              title="Features"
+              links={[
+                { label: 'PPP Discounts', href: '#' },
+              ]}
+            />
+
+            <FooterLinkGroup
+              title="Tools"
+              links={[
+                { label: 'Salary Converter', href: '#' },
+                { label: 'Coupon Generator', href: '#' },
+                { label: 'Stripe App', href: '#' },
+              ]}
+            />
+
+            <FooterLinkGroup
+              title="Company"
+              links={[
+                { label: 'Affiliate', href: '#' },
+                { label: 'Twitter', href: '#' },
+                { label: 'Terms of Service', href: '#' },
+              ]}
+            />
+          </div>
+
+          <div className="flex flex-col gap-8">
+            <FooterLinkGroup
+              title="Integrations"
+              links={[
+                { label: 'Lemon Squeezy', href: '#' },
+                { label: 'Gumroad', href: '#' },
+                { label: 'Stripe', href: '#' },
+                { label: 'Chargebee', href: '#' },
+                { label: 'Paddle', href: '#' },
+              ]}
+            />
+
+            <FooterLinkGroup
+              title="Tutorials"
+              links={[
+                { label: 'Lemon Squeezy', href: '#' },
+                { label: 'Gumroad', href: '#' },
+                { label: 'Stripe', href: '#' },
+                { label: 'Chargebee', href: '#' },
+                { label: 'Paddle', href: '#' },
+              ]}
+            />
+          </div>
+        </div>
+      </footer>
     </>
   );
 }
