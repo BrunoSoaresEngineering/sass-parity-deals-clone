@@ -1,5 +1,5 @@
 const subscriptionTiers = {
-  free: {
+  Free: {
     name: 'Free',
     priceInCents: 0,
     maxNumberOfProducts: 1,
@@ -8,7 +8,7 @@ const subscriptionTiers = {
     canCustomizeBanner: false,
     canRemoveBranding: false,
   },
-  basic: {
+  Basic: {
     name: 'Basic',
     priceInCents: 1900,
     maxNumberOfProducts: 5,
@@ -17,7 +17,7 @@ const subscriptionTiers = {
     canCustomizeBanner: false,
     canRemoveBranding: true,
   },
-  standard: {
+  Standard: {
     name: 'Standard',
     priceInCents: 4900,
     maxNumberOfProducts: 30,
@@ -26,7 +26,7 @@ const subscriptionTiers = {
     canCustomizeBanner: true,
     canRemoveBranding: true,
   },
-  premium: {
+  Premium: {
     name: 'Premium',
     priceInCents: 9900,
     maxNumberOfProducts: 50,
@@ -38,12 +38,13 @@ const subscriptionTiers = {
 };
 
 const subscriptionTiersInOrder = [
-  subscriptionTiers.free,
-  subscriptionTiers.basic,
-  subscriptionTiers.standard,
-  subscriptionTiers.premium,
+  subscriptionTiers.Free,
+  subscriptionTiers.Basic,
+  subscriptionTiers.Standard,
+  subscriptionTiers.Premium,
 ];
 
 export {
+  subscriptionTiers,
   subscriptionTiersInOrder,
 };
