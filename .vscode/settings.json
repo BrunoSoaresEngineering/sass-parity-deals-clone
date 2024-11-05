@@ -1,6 +1,7 @@
 {
   "conventionalCommits.scopes": [
     "Home",
-    "admin"
+    "admin",
+    "repo"
   ]
 }
