@@ -27,7 +27,7 @@ function Navbar() {
             <SignInButton>Login</SignInButton>
           </SignedOut>
           <SignedIn>
-            <Link href="/">Dashboard</Link>
+            <Link href="/dashboard">Dashboard</Link>
           </SignedIn>
         </span>
       </nav>
