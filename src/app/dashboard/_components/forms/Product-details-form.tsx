@@ -2,6 +2,7 @@
 
 'use client';
 
+import { z } from 'zod';
 import {
   Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage,
 } from '@/components/ui/form';
@@ -12,12 +13,30 @@ import RequiredLabelIcon from '@/components/Required-label-icon';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
+import { createProduct } from '@/server/actions/products';
+import { useToast } from '@/hooks/use-toast';
 
 function ProductDetailsForm() {
-  const form = useForm({ resolver: zodResolver(productDetailsSchema) });
+  const { toast } = useToast();
+  const form = useForm<z.infer<typeof productDetailsSchema>>({
+    resolver: zodResolver(productDetailsSchema),
+    defaultValues: {
+      name: '',
+      url: '',
+      description: '',
+    },
+  });
 
-  async function onSubmit(values) {
-    /* placeholder */
+  async function onSubmit(values: z.infer<typeof productDetailsSchema>) {
+    const data = await createProduct(values);
+
+    if (data?.message) {
+      toast({
+        title: data.error ? 'Error' : 'Success',
+        variant: data.error ? 'destructive' : 'default',
+        description: data.message,
+      });
+    }
   }
 
   return (
