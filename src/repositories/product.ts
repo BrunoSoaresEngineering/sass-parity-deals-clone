@@ -4,6 +4,7 @@ import { ProductCustomizationTable, ProductTable } from '@/db/schema';
 import {
   CACHE_TAGS,
   dbCache,
+  getIdTag,
   getUserTag,
   revalidateDbCache,
 } from '@/lib/cache';
@@ -28,6 +29,23 @@ export function getProducts(
   });
 
   return getProductsCached(userId, options);
+}
+
+async function getProductInternal({ id, userId }: { id: string, userId: string }) {
+  return db.query.ProductTable.findFirst({
+    where: ({ clerkUserId, id: productId }) => and(
+      eq(productId, id),
+      eq(clerkUserId, userId),
+    ),
+  });
+}
+
+export function getProduct({ id, userId }: { id: string, userId: string }) {
+  const getProductCached = dbCache(getProductInternal, {
+    tags: [getIdTag(id, CACHE_TAGS.products)],
+  });
+
+  return getProductCached({ id, userId });
 }
 
 export async function createProduct(data: typeof ProductTable.$inferInsert) {
@@ -61,12 +79,36 @@ export async function createProduct(data: typeof ProductTable.$inferInsert) {
   return newProduct;
 }
 
+export async function updateProduct(
+  data: Partial<typeof ProductTable.$inferInsert>,
+  { id, userId }: { id: string, userId: string },
+): Promise<boolean> {
+  const { rowCount } = await db
+    .update(ProductTable)
+    .set(data)
+    .where(and(eq(ProductTable.id, id), eq(ProductTable.clerkUserId, userId)));
+
+  const isUpdated = rowCount > 0;
+
+  if (isUpdated) {
+    revalidateDbCache({
+      tag: CACHE_TAGS.products,
+      userId,
+      id,
+    });
+  }
+
+  return isUpdated;
+}
+
 export async function deleteProduct({ productId, userId } : { productId: string, userId: string }) {
   const { rowCount } = await db
     .delete(ProductTable)
     .where(and(eq(ProductTable.id, productId), eq(ProductTable.clerkUserId, userId)));
 
-  if (rowCount > 0) {
+  const isUpdated = rowCount > 0;
+
+  if (isUpdated) {
     revalidateDbCache({
       tag: CACHE_TAGS.products,
       userId,
@@ -74,5 +116,5 @@ export async function deleteProduct({ productId, userId } : { productId: string,
     });
   }
 
-  return rowCount > 0;
+  return isUpdated;
 }

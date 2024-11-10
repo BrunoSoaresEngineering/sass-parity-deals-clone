@@ -13,14 +13,23 @@ import RequiredLabelIcon from '@/components/Required-label-icon';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { createProduct } from '@/server/actions/products';
+import { createProduct, updateProduct } from '@/server/actions/products';
 import { useToast } from '@/hooks/use-toast';
 
-function ProductDetailsForm() {
+type ProductDetailsFormProps = {
+  product?: {
+    id: string,
+    name: string,
+    url: string,
+    description: string | null,
+  }
+}
+
+function ProductDetailsForm({ product }: ProductDetailsFormProps) {
   const { toast } = useToast();
   const form = useForm<z.infer<typeof productDetailsSchema>>({
     resolver: zodResolver(productDetailsSchema),
-    defaultValues: {
+    defaultValues: product ? { ...product, description: product.description ?? '' } : {
       name: '',
       url: '',
       description: '',
@@ -28,7 +37,8 @@ function ProductDetailsForm() {
   });
 
   async function onSubmit(values: z.infer<typeof productDetailsSchema>) {
-    const data = await createProduct(values);
+    const action = product ? updateProduct.bind(null, product.id) : createProduct;
+    const data = await action(values);
 
     if (data?.message) {
       toast({
