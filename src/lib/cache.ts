@@ -51,3 +51,7 @@ export function revalidateDbCache ({
     revalidateTag(getIdTag(id, tag));
   }
 }
+
+export function clearFullCache() {
+  revalidateTag('*');
+}
