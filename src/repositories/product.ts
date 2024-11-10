@@ -1,8 +1,14 @@
+import { and, eq } from 'drizzle-orm';
 import { db } from '@/db';
 import { ProductCustomizationTable, ProductTable } from '@/db/schema';
-import { and, eq, or } from 'drizzle-orm';
+import {
+  CACHE_TAGS,
+  dbCache,
+  getUserTag,
+  revalidateDbCache,
+} from '@/lib/cache';
 
-export async function getProducts(
+async function getProductsInternal(
   userId: string,
   { limit }: { limit?: number} = {},
 ) {
@@ -11,6 +17,17 @@ export async function getProducts(
     orderBy: ({ createdAt }, { desc }) => desc(createdAt),
     limit,
   });
+}
+
+export function getProducts(
+  userId: string,
+  options?: Parameters<typeof getProductsInternal>[1],
+) {
+  const getProductsCached = dbCache(getProductsInternal, {
+    tags: [getUserTag(userId, CACHE_TAGS.products)],
+  });
+
+  return getProductsCached(userId, options);
 }
 
 export async function createProduct(data: typeof ProductTable.$inferInsert) {
@@ -34,6 +51,13 @@ export async function createProduct(data: typeof ProductTable.$inferInsert) {
   } catch {
     await db.delete(ProductTable).where(eq(ProductTable.id, newProduct.id));
   }
+
+  revalidateDbCache({
+    tag: CACHE_TAGS.products,
+    userId: data.clerkUserId,
+    id: newProduct.id,
+  });
+
   return newProduct;
 }
 
@@ -41,6 +65,14 @@ export async function deleteProduct({ productId, userId } : { productId: string,
   const { rowCount } = await db
     .delete(ProductTable)
     .where(and(eq(ProductTable.id, productId), eq(ProductTable.clerkUserId, userId)));
+
+  if (rowCount > 0) {
+    revalidateDbCache({
+      tag: CACHE_TAGS.products,
+      userId,
+      id: productId,
+    });
+  }
 
   return rowCount > 0;
 }
