@@ -5,6 +5,8 @@ import { cache } from 'react';
 export const CACHE_TAGS = {
   products: 'products',
   subscription: 'subscription',
+  countries: 'countries',
+  countryGroups: 'countryGroups',
 } as const;
 
 export function getGlobalTag(tag: keyof typeof CACHE_TAGS) {

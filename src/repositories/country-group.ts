@@ -1,7 +1,14 @@
+import { sql } from 'drizzle-orm';
 import { db } from '@/db';
 import { CountryGroupTable } from '@/db/schema';
-import { clearFullCache } from '@/lib/cache';
-import { sql } from 'drizzle-orm';
+import {
+  CACHE_TAGS,
+  clearFullCache,
+  dbCache,
+  getGlobalTag,
+  getIdTag,
+} from '@/lib/cache';
+import { getProduct } from './product';
 
 export async function addCountryGroups(data: typeof CountryGroupTable.$inferInsert[]) {
   const { rowCount } = await db
@@ -29,4 +36,67 @@ export async function getAll(options: Parameters<typeof db.query.CountryGroupTab
   return db.query.CountryGroupTable.findMany(options);
 }
 
-// { filters: Record<keyof typeof CountryGroupTable.$inferSelect, boolean> }
+async function getCountryGroupDiscountsByProductInternal({
+  userId,
+  productId,
+}: {
+  userId: string,
+  productId: string
+}) {
+  const product = await getProduct({ id: productId, userId });
+  if (!product) {
+    return [];
+  }
+
+  const countryGroupData = await db.query.CountryGroupTable.findMany({
+    with: {
+      countries: {
+        columns: {
+          name: true,
+          code: true,
+        },
+      },
+      countryGroupDiscounts: {
+        columns: {
+          coupon: true,
+          discountPercentage: true,
+        },
+        where: ({ productId: id }, { eq }) => eq(id, productId),
+      },
+    },
+    columns: {
+      id: true,
+      name: true,
+      recommendedDiscountPercentage: true,
+    },
+  });
+
+  return countryGroupData.map((groupData) => ({
+    id: groupData.id,
+    name: groupData.name,
+    recommendedDiscountPercentage: groupData.recommendedDiscountPercentage,
+    countries: groupData.countries,
+    discount: groupData.countryGroupDiscounts.at(0),
+  }));
+}
+
+export async function getCountryGroupDiscountsByProduct({
+  userId,
+  productId,
+}: {
+  userId: string,
+  productId: string
+}) {
+  const getCountryGroupDiscountsByProductCached = dbCache(
+    getCountryGroupDiscountsByProductInternal,
+    {
+      tags: [
+        getGlobalTag(CACHE_TAGS.countries),
+        getGlobalTag(CACHE_TAGS.countryGroups),
+        getIdTag(productId, CACHE_TAGS.products),
+      ],
+    },
+  );
+
+  return getCountryGroupDiscountsByProductCached({ productId, userId });
+}
