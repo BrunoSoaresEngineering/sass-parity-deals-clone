@@ -9,6 +9,7 @@ import {
 } from '@/components/ui/tabs';
 import { getProduct } from '@/repositories/product';
 import DetailsTab from './_components/Details-tab';
+import CountryTab from './_components/Country-tab';
 
 type Props = {
   params: Promise<{ productId: string }>
@@ -42,6 +43,9 @@ async function page({ params, searchParams }: Props) {
         </TabsList>
         <TabsContent value="details">
           <DetailsTab product={product} />
+        </TabsContent>
+        <TabsContent value="countries">
+          <CountryTab userId={userId} productId={productId} />
         </TabsContent>
       </Tabs>
     </PageWithBackButton>
