@@ -1,13 +1,20 @@
-import { sql } from 'drizzle-orm';
+import {
+  and,
+  eq,
+  inArray,
+  sql,
+} from 'drizzle-orm';
 import { db } from '@/db';
-import { CountryGroupTable } from '@/db/schema';
+import { CountryGroupDiscountTable, CountryGroupTable } from '@/db/schema';
 import {
   CACHE_TAGS,
   clearFullCache,
   dbCache,
   getGlobalTag,
   getIdTag,
+  revalidateDbCache,
 } from '@/lib/cache';
+import { BatchItem } from 'drizzle-orm/batch';
 import { getProduct } from './product';
 
 export async function addCountryGroups(data: typeof CountryGroupTable.$inferInsert[]) {
@@ -61,7 +68,7 @@ async function getCountryGroupDiscountsByProductInternal({
           coupon: true,
           discountPercentage: true,
         },
-        where: ({ productId: id }, { eq }) => eq(id, productId),
+        where: ({ productId: id }) => eq(id, productId),
       },
     },
     columns: {
@@ -99,4 +106,55 @@ export async function getCountryGroupDiscountsByProduct({
   );
 
   return getCountryGroupDiscountsByProductCached({ productId, userId });
+}
+
+export async function updateCountryDiscounts(
+  deleteGroups: { countryGroupId: string }[],
+  insertGroups: (typeof CountryGroupDiscountTable.$inferInsert)[],
+  { productId, userId }: { productId: string, userId: string },
+) {
+  const statements: BatchItem<'pg'>[] = [];
+
+  const deleteCountryGroupIds = deleteGroups.map((deleteGroup) => deleteGroup.countryGroupId);
+
+  if (deleteGroups.length > 0) {
+    statements.push(
+      db.delete(CountryGroupDiscountTable).where(
+        and(
+          eq(CountryGroupDiscountTable.productId, productId),
+          inArray(CountryGroupDiscountTable.countryGroupId, deleteCountryGroupIds),
+        ),
+      ),
+    );
+  }
+
+  if (insertGroups.length > 0) {
+    statements.push(
+      db
+        .insert(CountryGroupDiscountTable)
+        .values(insertGroups)
+        .onConflictDoUpdate({
+          target: [
+            CountryGroupDiscountTable.countryGroupId,
+            CountryGroupDiscountTable.productId,
+          ],
+          set: {
+            coupon: sql.raw(`excluded.${CountryGroupDiscountTable.coupon.name}`),
+            discountPercentage: sql.raw(
+              `excluded.${CountryGroupDiscountTable.discountPercentage.name}`,
+            ),
+          },
+        }),
+    );
+  }
+
+  if (statements.length > 0) {
+    await db.batch(statements as [BatchItem<'pg'>]);
+  }
+
+  revalidateDbCache({
+    tag: CACHE_TAGS.products,
+    id: productId,
+    userId,
+  });
 }
