@@ -17,6 +17,7 @@ import {
   FormField,
   FormItem,
   FormLabel,
+  FormMessage,
 } from '@/components/ui/form';
 
 type CountryDiscountsFormProps = {
@@ -51,7 +52,7 @@ function CountryDiscountsForm({ productId, countryGroups }: CountryDiscountsForm
         return {
           countryGroupId: id,
           discountPercentage: groupDiscount ? groupDiscount * 100 : undefined,
-          coupon: discount?.coupon,
+          coupon: discount?.coupon ?? '',
         };
       }),
     },
@@ -93,46 +94,51 @@ function CountryDiscountsForm({ productId, countryGroups }: CountryDiscountsForm
                   ))}
                 </div>
               </div>
-              <div className="flex gap-4 w-min flex-shrink-0">
-                <div className="flex flex-col ">
-                  <FormField
-                    control={form.control}
-                    name={`groups.${index}.discountPercentage`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Discount %</FormLabel>
-                        <FormControl>
-                          <Input
-                            className="w-24"
-                            type="number"
-                            min={0}
-                            max={100}
-                            value={field.value ?? ''}
-                            onChange={(value) => field.onChange(value.target.valueAsNumber)}
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                </div>
+              <div className="flex flex-col gap-2 w-min flex-shrink-0">
+                <div className="flex gap-4">
+                  <div className="flex flex-col ">
+                    <FormField
+                      control={form.control}
+                      name={`groups.${index}.discountPercentage`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Discount %</FormLabel>
+                          <FormControl>
+                            <Input
+                              className="w-24"
+                              type="number"
+                              min={0}
+                              max={100}
+                              value={field.value ?? ''}
+                              onChange={(value) => field.onChange(value.target.valueAsNumber)}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
 
-                <div className="flex flex-col ">
-                  <FormField
-                    control={form.control}
-                    name={`groups.${index}.coupon`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Coupon</FormLabel>
-                        <FormControl>
-                          <Input
-                            className="w-48"
-                            {...field}
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
+                  <div className="flex flex-col ">
+                    <FormField
+                      control={form.control}
+                      name={`groups.${index}.coupon`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Coupon</FormLabel>
+                          <FormControl>
+                            <Input
+                              className="w-48"
+                              {...field}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
                 </div>
+                <FormMessage>
+                  {form.formState.errors.groups?.[index]?.root?.message}
+                </FormMessage>
               </div>
             </CardContent>
           </Card>
