@@ -29,3 +29,13 @@ export const productCountryDiscountsSchema = z.object({
     },
   )),
 });
+
+export const productCustomizationSchema = z.object({
+  locationMessage: z.string().min(1, 'Required'),
+  backgroundColor: z.string().min(1, 'Required'),
+  textColor: z.string().min(1, 'Required'),
+  fontSize: z.string().min(1, 'Required'),
+  isSticky: z.boolean(),
+  bannerContainer: z.string().min(1, 'Required'),
+  classPrefix: z.string().optional(),
+});
