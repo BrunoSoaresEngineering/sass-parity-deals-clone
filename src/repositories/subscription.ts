@@ -1,7 +1,8 @@
+import { eq } from 'drizzle-orm';
 import { db } from '@/db';
 import { UserSubscriptionTable } from '@/db/schema';
 import { CACHE_TAGS, revalidateDbCache } from '@/lib/cache';
-import { eq } from 'drizzle-orm';
+import { subscriptionTiers } from '@/data/subscription-tiers';
 import { getProducts } from './product';
 
 export async function createUserSubscription(data: typeof UserSubscriptionTable.$inferInsert) {
@@ -48,4 +49,16 @@ export async function deleteUserSubscription(clerkUserId: string) {
   }));
 
   return userSubscriptions;
+}
+
+export async function getTierByUserId(userId: string) {
+  const subscription = await db.query.UserSubscriptionTable.findFirst({
+    where: ({ clerkUserId }) => eq(clerkUserId, userId),
+  });
+
+  if (!subscription) {
+    throw new Error('User has no subscription');
+  }
+
+  return subscriptionTiers[subscription.tier];
 }

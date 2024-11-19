@@ -26,9 +26,11 @@ type Props = {
     bannerContainer: string;
     classPrefix?: string | null;
   },
+  canCustomizeBanner: boolean,
+  canRemoveBranding: boolean
 };
 
-function ProductCustomizationForm({ customization }: Props) {
+function ProductCustomizationForm({ customization, canCustomizeBanner }: Props) {
   const form = useForm<z.infer<typeof productCustomizationSchema>>({
     resolver: zodResolver(productCustomizationSchema),
     defaultValues: {
@@ -56,6 +58,7 @@ function ProductCustomizationForm({ customization }: Props) {
                   <FormControl>
                     <Textarea
                       className="min-h-20 resize-none"
+                      disabled={!canCustomizeBanner}
                       {...field}
                     />
                   </FormControl>
@@ -78,7 +81,10 @@ function ProductCustomizationForm({ customization }: Props) {
                       <RequiredLabelIcon />
                     </FormLabel>
                     <FormControl>
-                      <Input {...field} />
+                      <Input
+                        {...field}
+                        disabled={!canCustomizeBanner}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -97,6 +103,7 @@ function ProductCustomizationForm({ customization }: Props) {
                     <FormControl>
                       <Input
                         {...field}
+                        disabled={!canCustomizeBanner}
                       />
                     </FormControl>
                     <FormMessage />
@@ -114,7 +121,10 @@ function ProductCustomizationForm({ customization }: Props) {
                       <RequiredLabelIcon />
                     </FormLabel>
                     <FormControl>
-                      <Input {...field} />
+                      <Input
+                        {...field}
+                        disabled={!canCustomizeBanner}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -130,6 +140,7 @@ function ProductCustomizationForm({ customization }: Props) {
                     <FormControl>
                       <Switch
                         className="block"
+                        disabled={!canCustomizeBanner}
                         checked={field.value}
                         onCheckedChange={field.onChange}
                       />
@@ -150,6 +161,7 @@ function ProductCustomizationForm({ customization }: Props) {
                     <FormControl>
                       <Input
                         {...field}
+                        disabled={!canCustomizeBanner}
                       />
                     </FormControl>
                     <FormDescription>
@@ -168,7 +180,10 @@ function ProductCustomizationForm({ customization }: Props) {
                   <FormItem>
                     <FormLabel>CSS Prefix</FormLabel>
                     <FormControl>
-                      <Input {...field} />
+                      <Input
+                        {...field}
+                        disabled={!canCustomizeBanner}
+                      />
                     </FormControl>
                     <FormDescription>
                       An optional prefix added to all CSS classes to avoid conflicts
@@ -179,9 +194,11 @@ function ProductCustomizationForm({ customization }: Props) {
             </div>
           </div>
 
-          <Button type="submit">
-            Save
-          </Button>
+          {canCustomizeBanner && (
+            <Button type="submit">
+              Save
+            </Button>
+          )}
         </form>
       </Form>
     </>
