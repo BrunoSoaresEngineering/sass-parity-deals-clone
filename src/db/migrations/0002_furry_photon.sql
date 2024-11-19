@@ -1,0 +1,1 @@
+ALTER TABLE "product_customizations" RENAME COLUMN "backgorund_color" TO "background_color";
