@@ -2,6 +2,7 @@
 
 'use client';
 
+import Banner from '@/components/Banner';
 import NoPermissionCard from '@/components/No-permission-card';
 import RequiredLabelIcon from '@/components/Required-label-icon';
 import { Button } from '@/components/ui/button';
@@ -42,7 +43,15 @@ function ProductCustomizationForm({ customization, canCustomizeBanner }: Props) 
   return (
     <>
       <div>
-        Banner
+        <Banner
+          customization={customization}
+          canRemoveBranding={canCustomizeBanner}
+          mappings={{
+            country: 'Portugal',
+            coupon: 'HALF-OFF',
+            discount: '50%',
+          }}
+        />
       </div>
       {!canCustomizeBanner && (
         <div className="mt-8">
