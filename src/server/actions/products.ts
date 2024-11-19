@@ -2,14 +2,18 @@
 
 import { z } from 'zod';
 import { redirect } from 'next/navigation';
-import { productCountryDiscountsSchema, productDetailsSchema } from '@/schemas/products';
+import { productCountryDiscountsSchema, productCustomizationSchema, productDetailsSchema } from '@/schemas/products';
 import { auth } from '@clerk/nextjs/server';
+import {
+  updateProductCustomization as updateProductCustomizationDB,
+} from '@/repositories/customization';
 import {
   createProduct as createProductDB,
   deleteProduct as deleteProductDB,
   updateProduct as updateProductDB,
 } from '@/repositories/product';
 import { updateCountryDiscounts as updateCountryDiscountsDB } from '@/repositories/country-group';
+import { checkCustomizeBanner } from '../permissions';
 
 // eslint-disable-next-line consistent-return
 export async function createProduct(
@@ -106,4 +110,24 @@ export async function updateCountryDiscounts(
   await updateCountryDiscountsDB(deleteGroups, insertGroups, { productId: id, userId });
 
   return { error: false, message: 'Country Discounts Saved' };
+}
+
+export async function updateProductCustomization(
+  id: string,
+  unsafeData: z.infer<typeof productCustomizationSchema>,
+) {
+  const { userId } = await auth();
+  const { success, data } = productCustomizationSchema.safeParse(unsafeData);
+  const canCustomize = checkCustomizeBanner(userId);
+
+  if (!success || !userId || !canCustomize) {
+    return {
+      error: true,
+      message: 'There was an error updating your banner',
+    };
+  }
+
+  await updateProductCustomizationDB({ productId: id, userId }, data);
+
+  return { error: false, message: 'Banner updated' };
 }

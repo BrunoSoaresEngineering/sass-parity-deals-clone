@@ -1,5 +1,13 @@
+import { eq } from 'drizzle-orm';
 import { db } from '@/db';
-import { CACHE_TAGS, dbCache, getIdTag } from '@/lib/cache';
+import { ProductCustomizationTable } from '@/db/schema';
+import {
+  CACHE_TAGS,
+  dbCache,
+  getIdTag,
+  revalidateDbCache,
+} from '@/lib/cache';
+import { getProduct } from './product';
 
 async function getByProductIdInternal({
   productId,
@@ -9,7 +17,7 @@ async function getByProductIdInternal({
   userId: string,
 }) {
   const data = await db.query.ProductTable.findFirst({
-    where: ({ id, clerkUserId }, { and, eq }) => and(
+    where: ({ id, clerkUserId }, { and }) => and(
       eq(id, productId),
       eq(clerkUserId, userId),
     ),
@@ -35,8 +43,30 @@ export function getByProductId({
   return getByProductIdCached({ productId, userId });
 }
 
+export async function updateProductCustomization(
+  { productId, userId }: {productId: string, userId: string },
+  data: Partial<typeof ProductCustomizationTable.$inferInsert>,
+) {
+  const product = await getProduct({ id: productId, userId });
+  if (!product) {
+    return;
+  }
+
+  await db
+    .update(ProductCustomizationTable)
+    .set(data)
+    .where(eq(ProductCustomizationTable.productId, productId));
+
+  revalidateDbCache({
+    tag: CACHE_TAGS.products,
+    id: productId,
+    userId,
+  });
+}
+
 const exports = {
   getByProductId,
+  updateProductCustomization,
 };
 
 export default exports;

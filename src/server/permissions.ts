@@ -1,11 +1,18 @@
 import { getTierByUserId } from '@/repositories/subscription';
 
-export async function checkRemoveBranding(userID: string) {
-  const tier = await getTierByUserId(userID);
+export async function checkRemoveBranding(userId: string | null | undefined) {
+  if (!userId) {
+    return false;
+  }
+
+  const tier = await getTierByUserId(userId);
   return tier.canRemoveBranding;
 }
 
-export async function checkCustomizeBanner(userID: string) {
-  const tier = await getTierByUserId(userID);
+export async function checkCustomizeBanner(userId: string | null | undefined) {
+  if (!userId) {
+    return false;
+  }
+  const tier = await getTierByUserId(userId);
   return tier.canCustomizeBanner;
 }

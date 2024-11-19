@@ -13,13 +13,16 @@ import {
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
+import { useToast } from '@/hooks/use-toast';
 import { productCustomizationSchema } from '@/schemas/products';
+import { updateProductCustomization } from '@/server/actions/products';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
 type Props = {
   customization: {
+    productId: string,
     locationMessage: string;
     backgroundColor: string;
     textColor: string;
@@ -33,6 +36,8 @@ type Props = {
 };
 
 function ProductCustomizationForm({ customization, canCustomizeBanner }: Props) {
+  const { toast } = useToast();
+
   const form = useForm<z.infer<typeof productCustomizationSchema>>({
     resolver: zodResolver(productCustomizationSchema),
     defaultValues: {
@@ -40,6 +45,19 @@ function ProductCustomizationForm({ customization, canCustomizeBanner }: Props) 
       classPrefix: customization.classPrefix ?? '',
     },
   });
+
+  const handleOnSubmit = async (values: z.infer<typeof productCustomizationSchema>) => {
+    const data = await updateProductCustomization(customization.productId, values);
+
+    if (data.message) {
+      toast({
+        title: data.error ? 'Error' : 'Success',
+        description: data.message,
+        variant: data.error ? 'destructive' : 'default',
+      });
+    }
+  };
+
   return (
     <>
       <div>
@@ -60,6 +78,7 @@ function ProductCustomizationForm({ customization, canCustomizeBanner }: Props) 
       )}
       <Form {...form}>
         <form
+          onSubmit={form.handleSubmit(handleOnSubmit)}
           className="flex flex-col gap-6 mt-8"
         >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
