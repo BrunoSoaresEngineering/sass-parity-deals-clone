@@ -2,6 +2,7 @@
 
 'use client';
 
+import NoPermissionCard from '@/components/No-permission-card';
 import RequiredLabelIcon from '@/components/Required-label-icon';
 import { Button } from '@/components/ui/button';
 import {
@@ -43,8 +44,15 @@ function ProductCustomizationForm({ customization, canCustomizeBanner }: Props) 
       <div>
         Banner
       </div>
+      {!canCustomizeBanner && (
+        <div className="mt-8">
+          <NoPermissionCard />
+        </div>
+      )}
       <Form {...form}>
-        <form>
+        <form
+          className="flex flex-col gap-6 mt-8"
+        >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <FormField
               control={form.control}
@@ -195,7 +203,10 @@ function ProductCustomizationForm({ customization, canCustomizeBanner }: Props) 
           </div>
 
           {canCustomizeBanner && (
-            <Button type="submit">
+            <Button
+              type="submit"
+              className="self-end"
+            >
               Save
             </Button>
           )}
