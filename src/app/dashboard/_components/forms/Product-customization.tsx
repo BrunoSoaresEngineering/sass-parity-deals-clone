@@ -58,11 +58,13 @@ function ProductCustomizationForm({ customization, canCustomizeBanner }: Props) 
     }
   };
 
+  const liveFormValues = form.watch();
+
   return (
     <>
       <div>
         <Banner
-          customization={customization}
+          customization={liveFormValues}
           canRemoveBranding={canCustomizeBanner}
           mappings={{
             country: 'Portugal',
