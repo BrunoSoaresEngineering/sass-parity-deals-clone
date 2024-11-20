@@ -1,4 +1,4 @@
-import { and, eq } from 'drizzle-orm';
+import { and, count, eq } from 'drizzle-orm';
 import { db } from '@/db';
 import { ProductCustomizationTable, ProductTable } from '@/db/schema';
 import {
@@ -117,4 +117,22 @@ export async function deleteProduct({ productId, userId } : { productId: string,
   }
 
   return isUpdated;
+}
+
+async function getProductCountInternal(userId: string) {
+  const counts = await db
+    .select({ productCount: count() })
+    .from(ProductTable)
+    .where(eq(ProductTable.clerkUserId, userId));
+
+  return counts[0]?.productCount ?? 0;
+}
+
+export async function getProductCount(userId:string) {
+  const getProductCountCached = dbCache(
+    getProductCountInternal,
+    { tags: [getUserTag(userId, CACHE_TAGS.products)] },
+  );
+
+  return getProductCountCached(userId);
 }

@@ -1,3 +1,5 @@
+import PermissionController from '@/components/Permission-controller';
+import { checkCreateProduct } from '@/server/permissions';
 import {
   Card,
   CardContent,
@@ -10,14 +12,20 @@ import ProductDetailsForm from '../../_components/forms/Product-details-form';
 function page() {
   return (
     <PageWithBackButton backButtonHref="/dashboard/products" pageTitle="Create Product">
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-xl">Product Details</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ProductDetailsForm />
-        </CardContent>
-      </Card>
+      <PermissionController
+        permission={checkCreateProduct}
+        renderFallback
+        fallbackText="You have already created the maximum number of products. Upgrade your account now to create more!"
+      >
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-xl">Product Details</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ProductDetailsForm />
+          </CardContent>
+        </Card>
+      </PermissionController>
     </PageWithBackButton>
   );
 }
