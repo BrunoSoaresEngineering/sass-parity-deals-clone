@@ -1,6 +1,7 @@
 import { getProducts } from '@/repositories/product';
 import { auth } from '@clerk/nextjs/server';
 import NoProducts from './_components/No-products';
+import ProductSection from './_components/Product-section';
 
 async function page() {
   const { userId, redirectToSignIn } = await auth();
@@ -14,7 +15,7 @@ async function page() {
     return <NoProducts />;
   }
   return (
-    <div>page</div>
+    <ProductSection userId={userId} titleHref="/dashboard/products" />
   );
 }
 export default page;
