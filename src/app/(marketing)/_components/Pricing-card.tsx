@@ -5,7 +5,7 @@ import {
 import { cn } from '@/lib/utils';
 import { formatCompactNumber } from '@/lib/fomatters';
 import { SignInButton } from '@clerk/nextjs';
-import Feature from './Feature';
+import Feature from '@/components/Feature';
 
 type PricingCardProps = {
   name: string,
