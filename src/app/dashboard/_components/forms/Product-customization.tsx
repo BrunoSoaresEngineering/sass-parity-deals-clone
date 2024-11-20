@@ -236,6 +236,7 @@ function ProductCustomizationForm({ customization, canCustomizeBanner }: Props) 
             <Button
               type="submit"
               className="self-end"
+              disabled={form.formState.isSubmitting}
             >
               Save
             </Button>
