@@ -1,7 +1,7 @@
-import { eq } from 'drizzle-orm';
+import { eq, type SQL } from 'drizzle-orm';
 import { db } from '@/db';
 import { UserSubscriptionTable } from '@/db/schema';
-import { CACHE_TAGS, revalidateDbCache } from '@/lib/cache';
+import { CACHE_TAGS, dbCache, getUserTag, revalidateDbCache } from '@/lib/cache';
 import { subscriptionTiers } from '@/data/subscription-tiers';
 import { getProducts } from './product';
 
@@ -49,6 +49,43 @@ export async function deleteUserSubscription(clerkUserId: string) {
   }));
 
   return userSubscriptions;
+}
+
+export async function updateUserSubscription(
+  data: Partial <typeof UserSubscriptionTable.$inferInsert>,
+  where: SQL,
+) {
+  const [updatedSubscription] = await db
+    .update(UserSubscriptionTable)
+    .set(data)
+    .where(where)
+    .returning({
+      id: UserSubscriptionTable.id,
+      userId: UserSubscriptionTable.clerkUserId,
+    });
+
+  if (updatedSubscription) {
+    revalidateDbCache({
+      tag: CACHE_TAGS.subscription,
+      userId: updatedSubscription.userId,
+      id: updatedSubscription.id,
+    });
+  }
+}
+
+async function getSubscriptionByUserIdInternal(userId: string) {
+  return db.query.UserSubscriptionTable.findFirst({
+    where: ({ clerkUserId }) => eq(clerkUserId, userId),
+  });
+}
+
+export async function getSubscriptionByUserId(userId: string) {
+  const getSubscriptionByUserIdCached = dbCache(
+    getSubscriptionByUserIdInternal,
+    { tags: [getUserTag(userId, CACHE_TAGS.subscription)] },
+  );
+
+  return getSubscriptionByUserIdCached(userId);
 }
 
 export async function getTierByUserId(userId: string) {

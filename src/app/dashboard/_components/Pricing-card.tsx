@@ -9,17 +9,10 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { createCancelSession, createCheckoutSession } from '@/server/actions/stripe';
+import { type TierNames, subscriptionTiersInOrder } from '@/data/subscription-tiers';
 
-type Props = {
-  name: string,
-  priceInCents: number,
-  maxNumberOfVisits: number,
-  maxNumberOfProducts: number,
-  canRemoveBranding: boolean,
-  canAccessAnalytics: boolean,
-  canCustomizeBanner: boolean,
-  currentTierName: string,
-}
+type PricingCardProps = (typeof subscriptionTiersInOrder[number] & { currentTierName: TierNames })
 
 function PricingCard({
   name,
@@ -30,8 +23,9 @@ function PricingCard({
   canAccessAnalytics,
   canCustomizeBanner,
   currentTierName,
-}: Props) {
+}: PricingCardProps) {
   const isCurrent = name === currentTierName;
+
   return (
     <Card className="rounded-3xl">
       <CardHeader>
@@ -42,7 +36,9 @@ function PricingCard({
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form>
+        <form
+          action={name === 'Free' ? createCancelSession : createCheckoutSession.bind(null, name)}
+        >
           <Button
             className="w-full text-lg rounded-lg"
             disabled={isCurrent}

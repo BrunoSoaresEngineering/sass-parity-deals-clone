@@ -67,6 +67,7 @@ async function SubscriptionPage() {
             canRemoveBranding={subscriptionTier.canRemoveBranding}
             canAccessAnalytics={subscriptionTier.canAccessAnalytics}
             canCustomizeBanner={subscriptionTier.canCustomizeBanner}
+            stripePriceId={subscriptionTier.stripePriceId}
             currentTierName={tier.name}
           />
         ))}
