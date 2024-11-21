@@ -54,7 +54,15 @@ export async function deleteUserSubscription(clerkUserId: string) {
 export async function updateUserSubscription(
   data: Partial <typeof UserSubscriptionTable.$inferInsert>,
   where: SQL,
+  userId: string,
 ) {
+  // Revalidating here since the revalidation below does not seem to be working.
+  // TODO: review when cache system is updated to 'use cache'
+  revalidateDbCache({
+    tag: CACHE_TAGS.subscription,
+    userId,
+  });
+
   const [updatedSubscription] = await db
     .update(UserSubscriptionTable)
     .set(data)

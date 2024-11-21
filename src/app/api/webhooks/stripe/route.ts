@@ -27,12 +27,15 @@ async function handleCreate(subscription: Stripe.Subscription) {
       tier: tier.name,
     },
     eq(UserSubscriptionTable.clerkUserId, clerkUserId),
+    clerkUserId,
   );
 }
 
 async function handleUpdate(subscription: Stripe.Subscription) {
+  const { clerkUserId } = subscription.metadata;
   const tier = getTierByPriceId(subscription.items.data[0].price.id);
-  if (!tier) {
+
+  if (!clerkUserId || !tier) {
     throw new Error();
   }
 
@@ -42,10 +45,17 @@ async function handleUpdate(subscription: Stripe.Subscription) {
   return updateUserSubscription(
     { tier: tier.name },
     eq(UserSubscriptionTable.stripeCustomerId, customerId),
+    clerkUserId,
   );
 }
 
 async function handleDelete(subscription: Stripe.Subscription) {
+  const { clerkUserId } = subscription.metadata;
+
+  if (!clerkUserId) {
+    throw new Error();
+  }
+
   const { customer } = subscription;
   const customerId = typeof customer === 'string' ? customer : customer.id;
 
@@ -56,6 +66,7 @@ async function handleDelete(subscription: Stripe.Subscription) {
       stripeSubscriptionItemId: null,
     },
     eq(UserSubscriptionTable.stripeCustomerId, customerId),
+    clerkUserId,
   );
 }
 
