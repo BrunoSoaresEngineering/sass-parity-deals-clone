@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-props-no-spreading */
 import {
   Card, CardContent, CardDescription, CardHeader, CardTitle,
 } from '@/components/ui/card';
@@ -60,15 +61,8 @@ async function SubscriptionPage() {
         {subscriptionTiersInOrder.map((subscriptionTier) => (
           <PricingCard
             key={subscriptionTier.name}
-            name={subscriptionTier.name}
-            priceInCents={subscriptionTier.priceInCents}
-            maxNumberOfVisits={subscriptionTier.maxNumberOfVisits}
-            maxNumberOfProducts={subscriptionTier.maxNumberOfProducts}
-            canRemoveBranding={subscriptionTier.canRemoveBranding}
-            canAccessAnalytics={subscriptionTier.canAccessAnalytics}
-            canCustomizeBanner={subscriptionTier.canCustomizeBanner}
-            stripePriceId={subscriptionTier.stripePriceId}
             currentTierName={tier.name}
+            {...subscriptionTier}
           />
         ))}
       </div>
