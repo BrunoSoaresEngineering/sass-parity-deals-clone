@@ -15,6 +15,7 @@ type Props = {
 }
 
 async function CustomizationTab ({ productId, userId }: Props) {
+  // eslint-disable-next-line import/no-named-as-default-member
   const customizationData = await customization.getByProductId({ productId, userId });
 
   if (!customizationData) {
