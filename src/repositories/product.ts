@@ -136,3 +136,58 @@ export async function getProductCount(userId:string) {
 
   return getProductCountCached(userId);
 }
+
+export async function getProductForBanner({
+  id,
+  countryCode,
+}: {
+  id: string,
+  countryCode: string,
+}) {
+  const data = await db.query.ProductTable.findFirst({
+    where: ({ id: productId }) => eq(productId, id),
+    columns: {
+      id: true,
+      clerkUserId: true,
+    },
+    with: {
+      productCustomization: true,
+      CountryGroupDiscounts: {
+        columns: {
+          coupon: true,
+          discountPercentage: true,
+        },
+        with: {
+          countryGroup: {
+            columns: {},
+            with: {
+              countries: {
+                columns: {
+                  id: true,
+                  name: true,
+                },
+                limit: 1,
+                where: ({ code }) => eq(code, countryCode),
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+
+  const targetGroupDiscount = data?.CountryGroupDiscounts.find((group) => (
+    group.countryGroup.countries.length > 0
+  ));
+
+  const discount = !data?.productCustomization || !targetGroupDiscount ? undefined : {
+    coupon: targetGroupDiscount.coupon,
+    percentage: targetGroupDiscount.discountPercentage,
+  };
+
+  return {
+    customization: data?.productCustomization,
+    country: targetGroupDiscount?.countryGroup.countries.at(0),
+    discount,
+  };
+}

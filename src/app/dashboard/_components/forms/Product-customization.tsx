@@ -2,7 +2,7 @@
 
 'use client';
 
-import Banner from '@/components/Banner';
+import Banner from '@/components/banner/Banner';
 import NoPermissionCard from '@/components/No-permission-card';
 import RequiredLabelIcon from '@/components/Required-label-icon';
 import { Button } from '@/components/ui/button';

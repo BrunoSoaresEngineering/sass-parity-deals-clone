@@ -1,7 +1,7 @@
 import { env } from '@/data/env/client';
 
 /* eslint-disable react/no-danger */
-type BannerProps = {
+export type BannerProps = {
   canRemoveBranding: boolean,
   mappings: {
     country: string,
