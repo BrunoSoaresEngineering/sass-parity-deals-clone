@@ -2,7 +2,7 @@ import { getJavaScriptForBanner } from '@/components/banner/utils';
 import { getCountryCode } from '@/lib/utils';
 import { getProductForBanner } from '@/repositories/product';
 import { createProductView } from '@/repositories/product-views';
-import { checkRemoveBranding } from '@/server/permissions';
+import { canShowDiscountBanner, checkRemoveBranding } from '@/server/permissions';
 import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
 import { NextRequest } from 'next/server';
@@ -31,6 +31,11 @@ export async function GET(
     userId,
   } = await getProductForBanner({ id: productId, countryCode, url: requestUrl });
   if (!customization || !discount || !country) {
+    return notFound();
+  }
+
+  const canShowBanner = await canShowDiscountBanner(userId);
+  if (!canShowBanner) {
     return notFound();
   }
 
