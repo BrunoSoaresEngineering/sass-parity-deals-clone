@@ -1,6 +1,7 @@
 import { getJavaScriptForBanner } from '@/components/banner/utils';
 import { getCountryCode } from '@/lib/utils';
 import { getProductForBanner } from '@/repositories/product';
+import { createProductView } from '@/repositories/product-views';
 import { checkRemoveBranding } from '@/server/permissions';
 import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
@@ -39,6 +40,8 @@ export async function GET(
     country.name,
     await checkRemoveBranding(userId),
   );
+
+  await createProductView(productId, country.id);
 
   return new Response(bannerJavaScript, { headers: { 'content-type': 'text/javascript' } });
 }
