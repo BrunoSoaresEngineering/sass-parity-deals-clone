@@ -1,6 +1,7 @@
 import { getJavaScriptForBanner } from '@/components/banner/utils';
 import { getCountryCode } from '@/lib/utils';
 import { getProductForBanner } from '@/repositories/product';
+import { checkRemoveBranding } from '@/server/permissions';
 import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
 import { NextRequest } from 'next/server';
@@ -26,12 +27,18 @@ export async function GET(
     customization,
     discount,
     country,
+    userId,
   } = await getProductForBanner({ id: productId, countryCode, url: requestUrl });
   if (!customization || !discount || !country) {
     return notFound();
   }
 
-  const bannerJavaScript = await getJavaScriptForBanner(customization, discount, country.name);
+  const bannerJavaScript = await getJavaScriptForBanner(
+    customization,
+    discount,
+    country.name,
+    await checkRemoveBranding(userId),
+  );
 
   return new Response(bannerJavaScript, { headers: { 'content-type': 'text/javascript' } });
 }

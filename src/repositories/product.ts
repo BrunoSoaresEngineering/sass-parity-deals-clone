@@ -195,5 +195,6 @@ export async function getProductForBanner({
     customization: data?.productCustomization,
     country: targetGroupDiscount?.countryGroup.countries.at(0),
     discount,
+    userId: data?.clerkUserId,
   };
 }

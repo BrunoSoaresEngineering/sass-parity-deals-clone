@@ -26,6 +26,7 @@ async function getJavaScriptForBanner(
     percentage: number,
   },
   country: string,
+  canRemoveBranding: boolean,
 ) {
   const mappings = {
     coupon: discount.coupon,
@@ -38,7 +39,7 @@ async function getJavaScriptForBanner(
   const bannerHTML = renderToStaticMarkup(createElement(Banner, {
     customization,
     mappings,
-    canRemoveBranding: false,
+    canRemoveBranding,
   }), {
   });
 
