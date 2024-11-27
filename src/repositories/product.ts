@@ -8,6 +8,7 @@ import {
   getUserTag,
   revalidateDbCache,
 } from '@/lib/cache';
+import { removeTrailingSlash } from '@/lib/utils';
 
 async function getProductsInternal(
   userId: string,
@@ -140,12 +141,17 @@ export async function getProductCount(userId:string) {
 export async function getProductForBanner({
   id,
   countryCode,
+  url,
 }: {
   id: string,
   countryCode: string,
+  url: string
 }) {
   const data = await db.query.ProductTable.findFirst({
-    where: ({ id: productId }) => eq(productId, id),
+    where: ({ id: productId, url: productUrl }) => and(
+      eq(productId, id),
+      eq(productUrl, removeTrailingSlash(url)),
+    ),
     columns: {
       id: true,
       clerkUserId: true,

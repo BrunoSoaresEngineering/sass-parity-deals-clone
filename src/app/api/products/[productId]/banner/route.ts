@@ -1,6 +1,7 @@
 import { getJavaScriptForBanner } from '@/components/banner/utils';
 import { getCountryCode } from '@/lib/utils';
 import { getProductForBanner } from '@/repositories/product';
+import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
 import { NextRequest } from 'next/server';
 
@@ -9,8 +10,14 @@ export async function GET(
   { params }: { params: Promise<{ productId: string }>},
 ) {
   const { productId } = await params;
-  const countryCode = getCountryCode(request);
 
+  const webHeaders = await headers();
+  const requestUrl = webHeaders.get('referer') || webHeaders.get('origin');
+  if (!requestUrl) {
+    return notFound();
+  }
+
+  const countryCode = getCountryCode(request);
   if (!countryCode) {
     return notFound();
   }
@@ -19,7 +26,7 @@ export async function GET(
     customization,
     discount,
     country,
-  } = await getProductForBanner({ id: productId, countryCode });
+  } = await getProductForBanner({ id: productId, countryCode, url: requestUrl });
   if (!customization || !discount || !country) {
     return notFound();
   }

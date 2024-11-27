@@ -16,3 +16,7 @@ export function getCountryCode(request: NextRequest) {
 
   return geo.country;
 }
+
+export function removeTrailingSlash(path: string) {
+  return path.replace(/\/$/, '');
+}
