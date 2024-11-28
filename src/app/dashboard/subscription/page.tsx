@@ -1,4 +1,5 @@
 /* eslint-disable react/jsx-props-no-spreading */
+import { startOfMonth } from 'date-fns';
 import {
   Card, CardContent, CardDescription, CardHeader, CardTitle,
 } from '@/components/ui/card';
@@ -8,6 +9,7 @@ import { formatCompactNumber } from '@/lib/fomatters';
 import { getProductCount } from '@/repositories/product';
 import { getTierByUserId } from '@/repositories/subscription';
 import { auth } from '@clerk/nextjs/server';
+import { getProductViewCount } from '@/repositories/product-views';
 import PricingCard from '../_components/Pricing-card';
 
 async function SubscriptionPage() {
@@ -19,7 +21,7 @@ async function SubscriptionPage() {
 
   const tier = await getTierByUserId(userId);
 
-  const pageVisits = 0;
+  const pageVisits = await getProductViewCount(userId, startOfMonth(new Date()));
   const productNumber = await getProductCount(userId);
 
   return (
