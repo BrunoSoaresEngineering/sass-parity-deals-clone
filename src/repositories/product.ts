@@ -4,6 +4,7 @@ import { ProductCustomizationTable, ProductTable } from '@/db/schema';
 import {
   CACHE_TAGS,
   dbCache,
+  getGlobalTag,
   getIdTag,
   getUserTag,
   revalidateDbCache,
@@ -138,7 +139,7 @@ export async function getProductCount(userId:string) {
   return getProductCountCached(userId);
 }
 
-export async function getProductForBanner({
+async function getProductForBannerInternal({
   id,
   countryCode,
   url,
@@ -197,4 +198,24 @@ export async function getProductForBanner({
     discount,
     userId: data?.clerkUserId,
   };
+}
+
+export async function getProductForBanner({
+  id,
+  countryCode,
+  url,
+}: {
+  id: string,
+  countryCode: string,
+  url: string
+}) {
+  const getProductForBannerCached = dbCache(getProductForBannerInternal, {
+    tags: [
+      getIdTag(id, CACHE_TAGS.products),
+      getGlobalTag(CACHE_TAGS.countries),
+      getGlobalTag(CACHE_TAGS.countryGroups),
+    ],
+  });
+
+  return getProductForBannerCached({ id, countryCode, url });
 }

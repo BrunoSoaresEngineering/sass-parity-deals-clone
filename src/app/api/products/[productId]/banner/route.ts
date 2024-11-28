@@ -30,7 +30,7 @@ export async function GET(
     country,
     userId,
   } = await getProductForBanner({ id: productId, countryCode, url: requestUrl });
-  if (!customization || !discount || !country) {
+  if (!customization || !discount || !country || !userId) {
     return notFound();
   }
 
@@ -46,7 +46,7 @@ export async function GET(
     await checkRemoveBranding(userId),
   );
 
-  await createProductView(productId, country.id);
+  await createProductView(productId, country.id, userId);
 
   return new Response(bannerJavaScript, { headers: { 'content-type': 'text/javascript' } });
 }
