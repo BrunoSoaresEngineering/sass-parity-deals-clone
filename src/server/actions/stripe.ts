@@ -3,7 +3,7 @@
 import { Stripe } from 'stripe';
 import { subscriptionTiers, type PaidTierNames } from '@/data/subscription-tiers';
 import { getSubscriptionByUserId } from '@/repositories/subscription';
-import { currentUser, User } from '@clerk/nextjs/server';
+import { auth, currentUser, User } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import { env as serverEnv } from '@/data/env/server';
 import { env as clientEnv } from '@/data/env/client';
@@ -30,6 +30,15 @@ async function getCheckoutSession(tier: PaidTierNames, user: User) {
   });
 
   return session.url;
+}
+
+async function getCustomerPortalSession(stripeCustomerId: string) {
+  const portalSession = await stripe.billingPortal.sessions.create({
+    customer: stripeCustomerId,
+    return_url: `${clientEnv.NEXT_PUBLIC_SERVER_URL}/dashboard/subscription`,
+  });
+
+  return portalSession.url;
 }
 
 async function getSubscriptionUpgradeSession(
@@ -122,4 +131,21 @@ export async function createCancelSession() {
   });
 
   redirect(portalSession.url);
+}
+
+export async function createCustomerPortalSession() {
+  const { userId } = await auth();
+  if (!userId) {
+    return;
+  }
+
+  const subscription = await getSubscriptionByUserId(userId);
+
+  if (!subscription?.stripeCustomerId) {
+    return;
+  }
+
+  const url = await getCustomerPortalSession(subscription.stripeCustomerId);
+
+  redirect(url);
 }
