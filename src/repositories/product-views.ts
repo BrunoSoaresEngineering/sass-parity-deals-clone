@@ -13,6 +13,18 @@ import {
   gte,
 } from 'drizzle-orm';
 
+export const CHART_INTERVALS = {
+  last7Days: {
+    label: 'Last 7 days',
+  },
+  last30Days: {
+    label: 'Last 30 days',
+  },
+  last365Days: {
+    label: 'Last 365 days',
+  },
+};
+
 export async function createProductView(
   productId: string,
   countryId: string,

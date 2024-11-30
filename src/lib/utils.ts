@@ -20,3 +20,20 @@ export function getCountryCode(request: NextRequest) {
 export function removeTrailingSlash(path: string) {
   return path.replace(/\/$/, '');
 }
+
+export function createHrefWithUpdatedSearchparams(
+  href: string,
+  oldSearchParams: Record<string, string>,
+  newSearchParams: Record<string, string | undefined>,
+) {
+  const params = new URLSearchParams(oldSearchParams);
+  Object.entries(newSearchParams).forEach(([key, value]) => {
+    if (!value) {
+      params.delete(key);
+      return;
+    }
+    params.set(key, value);
+  });
+
+  return `${href}?${params.toString()}`;
+}
