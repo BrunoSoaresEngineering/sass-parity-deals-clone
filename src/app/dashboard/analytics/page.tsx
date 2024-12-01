@@ -3,6 +3,7 @@ import { createHrefWithUpdatedSearchparams } from '@/lib/utils';
 import { getProducts } from '@/repositories/product';
 import { auth } from '@clerk/nextjs/server';
 import AnalyticsDropdown from './_components/Analytics-dropdown';
+import ViewsByDayCard from './_components/_views_by_day/Card';
 
 type SearchParams = Promise<{
   interval?: keyof typeof CHART_INTERVALS,
@@ -57,7 +58,7 @@ async function AnalyticsPage(props: { searchParams: SearchParams}) {
     return redirectToSignIn();
   }
 
-  const { interval = 'last7Days', productId = 'All Products', timezone = 'UTC' } = searchParams;
+  const { interval = 'last7Days', productId, timezone = 'UTC' } = searchParams;
 
   const currentInterval = CHART_INTERVALS[interval];
   const intervalsDropdown = Object.entries(CHART_INTERVALS).map(([key, value]) => ({
@@ -70,9 +71,10 @@ async function AnalyticsPage(props: { searchParams: SearchParams}) {
     ),
   }));
 
+  const currentProduct = productId ?? 'All Products';
   const products = await getProducts(userId);
   const productsDropdown = getProductDropdownInformation(products, searchParams);
-  const currentProductLabel = productsDropdown[productId].label;
+  const currentProductLabel = productsDropdown[currentProduct].label;
 
   const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   const timezoneDropdown = [
@@ -97,16 +99,26 @@ async function AnalyticsPage(props: { searchParams: SearchParams}) {
   ];
 
   return (
-    <div className="flex flex-row justify-between gap-2">
-      <h1 className="text-3xl font-semibold flex-grow">Analytics</h1>
+    <>
+      <div className="flex flex-row justify-between gap-2">
+        <h1 className="text-3xl font-semibold flex-grow">Analytics</h1>
 
-      <AnalyticsDropdown currentLabel={currentInterval.label} items={intervalsDropdown} />
-      <AnalyticsDropdown
-        currentLabel={currentProductLabel}
-        items={Object.values(productsDropdown)}
-      />
-      <AnalyticsDropdown currentLabel={timezone} items={timezoneDropdown} />
-    </div>
+        <AnalyticsDropdown currentLabel={currentInterval.label} items={intervalsDropdown} />
+        <AnalyticsDropdown
+          currentLabel={currentProductLabel}
+          items={Object.values(productsDropdown)}
+        />
+        <AnalyticsDropdown currentLabel={timezone} items={timezoneDropdown} />
+      </div>
+      <div>
+        <ViewsByDayCard
+          userId={userId}
+          productId={productId}
+          interval={currentInterval}
+          timezone={timezone}
+        />
+      </div>
+    </>
   );
 }
 export default AnalyticsPage;
