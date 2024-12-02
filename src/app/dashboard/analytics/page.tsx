@@ -4,6 +4,7 @@ import { getProducts } from '@/repositories/product';
 import { auth } from '@clerk/nextjs/server';
 import AnalyticsDropdown from './_components/Analytics-dropdown';
 import ViewsByDayCard from './_components/_views_by_day/Card';
+import ViewsByPPPGroupCard from './_components/_views_by_ppp_group/Card';
 
 type SearchParams = Promise<{
   interval?: keyof typeof CHART_INTERVALS,
@@ -110,8 +111,14 @@ async function AnalyticsPage(props: { searchParams: SearchParams}) {
         />
         <AnalyticsDropdown currentLabel={timezone} items={timezoneDropdown} />
       </div>
-      <div>
+      <div className="mt-6 flex flex-col gap-8">
         <ViewsByDayCard
+          userId={userId}
+          productId={productId}
+          interval={currentInterval}
+          timezone={timezone}
+        />
+        <ViewsByPPPGroupCard
           userId={userId}
           productId={productId}
           interval={currentInterval}

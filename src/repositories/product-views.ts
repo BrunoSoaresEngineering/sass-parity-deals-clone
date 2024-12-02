@@ -1,13 +1,21 @@
 import { db } from '@/db';
-import { ProductTable, ProductViewTable } from '@/db/schema';
+import {
+  CountryGroupTable,
+  CountryTable,
+  ProductTable,
+  ProductViewTable,
+} from '@/db/schema';
 import {
   CACHE_TAGS,
   dbCache,
+  getGlobalTag,
   getIdTag,
   getUserTag,
   revalidateDbCache,
 } from '@/lib/cache';
 import { formatDate, formatMonth } from '@/lib/fomatters';
+import { startOfDay, subDays } from 'date-fns';
+import { tz } from '@date-fns/tz';
 import {
   and,
   count,
@@ -23,18 +31,21 @@ export const CHART_INTERVALS = {
     sql: sql`GENERATE_SERIES(current_date - 7, current_date, '1 day'::interval) as series`,
     dateGrouper: (col: SQL | SQL.Aliased) => sql<string>`DATE(${col})`.inlineParams(),
     dateFormatter: formatDate,
+    startDate: subDays(new Date(), 7),
   },
   last30Days: {
     label: 'Last 30 days',
     sql: sql`GENERATE_SERIES(current_date - 30, current_date, '1 day'::interval) as series`,
     dateGrouper: (col: SQL | SQL.Aliased) => sql<string>`DATE(${col})`.inlineParams(),
     dateFormatter: formatDate,
+    startDate: subDays(new Date(), 30),
   },
   last365Days: {
     label: 'Last 365 days',
     sql: sql`GENERATE_SERIES(DATE_TRUNC('month', current_date - 365), DATE_TRUNC('month', current_date), '1 month'::interval) as series`,
     dateGrouper: (col: SQL | SQL.Aliased) => sql<string>`DATE_TRUNC('month', ${col})`.inlineParams(),
     dateFormatter: formatMonth,
+    startDate: subDays(new Date(), 365),
   },
 };
 
@@ -161,6 +172,76 @@ export async function getViewsByDay({
   });
 
   return getViewsByDayCached({
+    userId,
+    productId,
+    timezone,
+    interval,
+  });
+}
+
+async function getViewsByPPPGroupInternal({
+  userId,
+  productId,
+  timezone,
+  interval,
+}: {
+  userId: string,
+  productId?: string,
+  timezone: string,
+  interval: (typeof CHART_INTERVALS)[keyof typeof CHART_INTERVALS],
+}) {
+  const startDate = startOfDay(interval.startDate, { in: tz(timezone) });
+
+  const productsSubQuery = getProductSubQuery(userId, productId);
+
+  const productViewsSubquery = db.$with('productViews').as(
+    db
+      .with(productsSubQuery)
+      .select({
+        visitedAt: sql`${ProductViewTable.visitedAt} AT TIME ZONE ${timezone}`
+          .inlineParams()
+          .as('visitedAt'),
+        countryGroupId: CountryTable.countryGroupId,
+      })
+      .from(ProductViewTable)
+      .innerJoin(productsSubQuery, eq(productsSubQuery.id, ProductViewTable.productId))
+      .innerJoin(CountryTable, eq(CountryTable.id, ProductViewTable.countryId))
+      .where(({ visitedAt }) => gte(visitedAt, startDate)),
+  );
+
+  return db
+    .with(productViewsSubquery)
+    .select({
+      pppName: CountryGroupTable.name,
+      views: count(productViewsSubquery.visitedAt),
+    })
+    .from(CountryGroupTable)
+    .leftJoin(productViewsSubquery, eq(productViewsSubquery.countryGroupId, CountryGroupTable.id))
+    .groupBy(({ pppName }) => [pppName])
+    .orderBy(({ pppName }) => pppName);
+}
+
+export async function getViewsByPPPGroup({
+  userId,
+  productId,
+  timezone,
+  interval,
+}: {
+  userId: string,
+  productId?: string,
+  timezone: string,
+  interval: (typeof CHART_INTERVALS)[keyof typeof CHART_INTERVALS],
+}) {
+  const getViewsByPPPGroupCached = dbCache(getViewsByPPPGroupInternal, {
+    tags: [
+      getGlobalTag(CACHE_TAGS.countries),
+      getGlobalTag(CACHE_TAGS.countryGroups),
+      getIdTag(userId, CACHE_TAGS.productViews),
+      productId ? getIdTag(productId, CACHE_TAGS.products) : getIdTag(userId, CACHE_TAGS.products),
+    ],
+  });
+
+  return getViewsByPPPGroupCached({
     userId,
     productId,
     timezone,

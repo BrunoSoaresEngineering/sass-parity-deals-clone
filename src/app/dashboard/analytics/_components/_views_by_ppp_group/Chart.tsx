@@ -10,14 +10,14 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/
 import { formatCompactNumber } from '@/lib/fomatters';
 import { cn } from '@/lib/utils';
 
-type ViewsByDayChartProps = {
+type ViewsByPPPGroupChartProps = {
   chartData: {
-    date: string,
+    pppName: string,
     views: number
   }[]
 }
 
-function ViewsByDayChart({ chartData }: ViewsByDayChartProps) {
+function ViewsByPPPGroupChart({ chartData }: ViewsByPPPGroupChartProps) {
   const chartConfig = {
     views: {
       label: 'Visitors',
@@ -36,13 +36,18 @@ function ViewsByDayChart({ chartData }: ViewsByDayChartProps) {
     );
   }
 
+  const data = chartData.map((dataItem) => ({
+    pppName: dataItem.pppName.replace('Parity Group: ', ''),
+    views: dataItem.views,
+  }));
+
   return (
     <ChartContainer
       config={chartConfig}
       className="min-h-[150px] max-h-[250px] w-full"
     >
-      <BarChart accessibilityLayer data={chartData}>
-        <XAxis dataKey="date" tickLine={false} />
+      <BarChart accessibilityLayer data={data}>
+        <XAxis dataKey="pppName" tickLine={false} tickMargin={10} />
         <YAxis
           tickLine={false}
           tickMargin={10}
@@ -50,12 +55,9 @@ function ViewsByDayChart({ chartData }: ViewsByDayChartProps) {
           tickFormatter={formatCompactNumber}
         />
         <ChartTooltip content={<ChartTooltipContent />} />
-        <Bar
-          dataKey="views"
-          fill="var(--color-views)"
-        />
+        <Bar dataKey="views" fill="var(--color-views)" />
       </BarChart>
     </ChartContainer>
   );
 }
-export default ViewsByDayChart;
+export default ViewsByPPPGroupChart;
