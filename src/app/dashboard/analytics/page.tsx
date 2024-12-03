@@ -5,6 +5,7 @@ import { auth } from '@clerk/nextjs/server';
 import AnalyticsDropdown from './_components/Analytics-dropdown';
 import ViewsByDayCard from './_components/_views_by_day/Card';
 import ViewsByPPPGroupCard from './_components/_views_by_ppp_group/Card';
+import ViewsByCountryCard from './_components/_views_by_country/Card';
 
 type SearchParams = Promise<{
   interval?: keyof typeof CHART_INTERVALS,
@@ -119,6 +120,12 @@ async function AnalyticsPage(props: { searchParams: SearchParams}) {
           timezone={timezone}
         />
         <ViewsByPPPGroupCard
+          userId={userId}
+          productId={productId}
+          interval={currentInterval}
+          timezone={timezone}
+        />
+        <ViewsByCountryCard
           userId={userId}
           productId={productId}
           interval={currentInterval}

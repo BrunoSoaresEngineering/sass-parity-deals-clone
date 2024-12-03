@@ -19,6 +19,7 @@ import { tz } from '@date-fns/tz';
 import {
   and,
   count,
+  desc,
   eq,
   gte,
   SQL,
@@ -167,7 +168,9 @@ export async function getViewsByDay({
   const getViewsByDayCached = dbCache(getViewsByDayInternal, {
     tags: [
       getUserTag(userId, CACHE_TAGS.productViews),
-      productId ? getIdTag(productId, CACHE_TAGS.products) : getIdTag(userId, CACHE_TAGS.products),
+      productId
+        ? getIdTag(productId, CACHE_TAGS.products)
+        : getUserTag(userId, CACHE_TAGS.products),
     ],
   });
 
@@ -237,11 +240,75 @@ export async function getViewsByPPPGroup({
       getGlobalTag(CACHE_TAGS.countries),
       getGlobalTag(CACHE_TAGS.countryGroups),
       getIdTag(userId, CACHE_TAGS.productViews),
-      productId ? getIdTag(productId, CACHE_TAGS.products) : getIdTag(userId, CACHE_TAGS.products),
+      productId
+        ? getIdTag(productId, CACHE_TAGS.products)
+        : getUserTag(userId, CACHE_TAGS.products),
     ],
   });
 
   return getViewsByPPPGroupCached({
+    userId,
+    productId,
+    timezone,
+    interval,
+  });
+}
+
+async function getViewsByCountryInternal({
+  userId,
+  productId,
+  timezone,
+  interval,
+}: {
+  userId: string,
+  productId?: string,
+  timezone: string,
+  interval: typeof CHART_INTERVALS[keyof typeof CHART_INTERVALS]
+}) {
+  const startDate = startOfDay(interval.startDate, { in: tz(timezone) });
+
+  const productSubQuery = getProductSubQuery(userId, productId);
+
+  return db
+    .with(productSubQuery)
+    .select({
+      countryCode: CountryTable.code,
+      countryName: CountryTable.name,
+      views: count(ProductViewTable.visitedAt),
+    })
+    .from(ProductViewTable)
+    .innerJoin(productSubQuery, eq(productSubQuery.id, ProductViewTable.productId))
+    .innerJoin(CountryTable, eq(CountryTable.id, ProductViewTable.countryId))
+    .where(
+      gte(sql`${ProductViewTable.visitedAt} AT TIME ZONE ${timezone}`.inlineParams(), startDate),
+    )
+    .groupBy(({ countryCode, countryName }) => [countryCode, countryName])
+    .orderBy(({ views }) => desc(views))
+    .limit(25);
+}
+
+export async function getViewsByCountry({
+  userId,
+  productId,
+  timezone,
+  interval,
+}: {
+  userId: string,
+  productId?: string,
+  timezone: string,
+  interval: typeof CHART_INTERVALS[keyof typeof CHART_INTERVALS]
+}) {
+  const getViewsByCountryCached = dbCache(getViewsByCountryInternal, {
+    tags: [
+      getGlobalTag(CACHE_TAGS.countries),
+      getUserTag(userId, CACHE_TAGS.productViews),
+      productId
+        ? getIdTag(productId, CACHE_TAGS.products)
+        : getUserTag(userId, CACHE_TAGS.products),
+    ],
+  });
+
+  return getViewsByCountryCached({
     userId,
     productId,
     timezone,
