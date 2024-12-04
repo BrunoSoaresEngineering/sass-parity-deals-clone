@@ -84,7 +84,7 @@ function page() {
           Pricing software which pays for itself 20x over
         </h2>
 
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 max-w-screen-xl">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 max-w-screen-xl mx-auto">
           {subscriptionTiersInOrder.map((subscriptionTier) => (
             <PricingCard
               key={subscriptionTier.name}
