@@ -2,6 +2,8 @@ import { CHART_INTERVALS } from '@/repositories/product-views';
 import { createHrefWithUpdatedSearchparams } from '@/lib/utils';
 import { getProducts } from '@/repositories/product';
 import { auth } from '@clerk/nextjs/server';
+import PermissionController from '@/components/Permission-controller';
+import { canAccessAnalytics } from '@/server/permissions';
 import AnalyticsDropdown from './_components/Analytics-dropdown';
 import ViewsByDayCard from './_components/_views_by_day/Card';
 import ViewsByPPPGroupCard from './_components/_views_by_ppp_group/Card';
@@ -105,32 +107,36 @@ async function AnalyticsPage(props: { searchParams: SearchParams}) {
       <div className="flex flex-row justify-between gap-2">
         <h1 className="text-3xl font-semibold flex-grow">Analytics</h1>
 
-        <AnalyticsDropdown currentLabel={currentInterval.label} items={intervalsDropdown} />
-        <AnalyticsDropdown
-          currentLabel={currentProductLabel}
-          items={Object.values(productsDropdown)}
-        />
-        <AnalyticsDropdown currentLabel={timezone} items={timezoneDropdown} />
+        <PermissionController permission={canAccessAnalytics}>
+          <AnalyticsDropdown currentLabel={currentInterval.label} items={intervalsDropdown} />
+          <AnalyticsDropdown
+            currentLabel={currentProductLabel}
+            items={Object.values(productsDropdown)}
+          />
+          <AnalyticsDropdown currentLabel={timezone} items={timezoneDropdown} />
+        </PermissionController>
       </div>
       <div className="mt-6 flex flex-col gap-8">
-        <ViewsByDayCard
-          userId={userId}
-          productId={productId}
-          interval={currentInterval}
-          timezone={timezone}
-        />
-        <ViewsByPPPGroupCard
-          userId={userId}
-          productId={productId}
-          interval={currentInterval}
-          timezone={timezone}
-        />
-        <ViewsByCountryCard
-          userId={userId}
-          productId={productId}
-          interval={currentInterval}
-          timezone={timezone}
-        />
+        <PermissionController permission={canAccessAnalytics} renderFallback>
+          <ViewsByDayCard
+            userId={userId}
+            productId={productId}
+            interval={currentInterval}
+            timezone={timezone}
+          />
+          <ViewsByPPPGroupCard
+            userId={userId}
+            productId={productId}
+            interval={currentInterval}
+            timezone={timezone}
+          />
+          <ViewsByCountryCard
+            userId={userId}
+            productId={productId}
+            interval={currentInterval}
+            timezone={timezone}
+          />
+        </PermissionController>
       </div>
     </>
   );

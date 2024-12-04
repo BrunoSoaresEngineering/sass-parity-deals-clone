@@ -42,3 +42,13 @@ export async function canShowDiscountBanner(userId: string | null | undefined) {
 
   return tier.maxNumberOfVisits > productViewCount;
 }
+
+export async function canAccessAnalytics(userId: string | null | undefined) {
+  if (!userId) {
+    return false;
+  }
+
+  const tier = await getTierByUserId(userId);
+
+  return tier.canAccessAnalytics;
+}
