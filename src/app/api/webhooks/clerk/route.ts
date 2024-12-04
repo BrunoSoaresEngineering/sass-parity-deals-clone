@@ -23,6 +23,7 @@ export async function POST(req: Request) {
       'svix-signature': svixSignature,
     }) as WebhookEvent;
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error('Error verifying webhook:', error);
     return new Response('Error occurred', {
       status: 400,

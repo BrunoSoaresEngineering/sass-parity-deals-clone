@@ -42,4 +42,5 @@ async function addCountries() {
 const groupCount = await addCountryGroups();
 const countryCount = await addCountries();
 
+// eslint-disable-next-line no-console
 console.log(`Updated ${groupCount} country groups and ${countryCount} countries`);
