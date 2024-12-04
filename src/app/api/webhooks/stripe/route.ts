@@ -64,7 +64,6 @@ async function handleDelete(subscription: Stripe.Subscription) {
       tier: subscriptionTiers.Free.name,
       stripeSubscriptionId: null,
       stripeSubscriptionItemId: null,
-      stripeCustomerId: null,
     },
     eq(UserSubscriptionTable.stripeCustomerId, customerId),
     clerkUserId,

@@ -10,9 +10,10 @@ import { env as clientEnv } from '@/data/env/client';
 
 const stripe = new Stripe(serverEnv.STRIPE_SECRET_KEY);
 
-async function getCheckoutSession(tier: PaidTierNames, user: User) {
+async function getCheckoutSession(tier: PaidTierNames, user: User, stripeCustomerId?: string) {
   const session = await stripe.checkout.sessions.create({
-    customer_email: user.primaryEmailAddress?.emailAddress,
+    customer: stripeCustomerId,
+    customer_email: stripeCustomerId ? undefined : user.primaryEmailAddress?.emailAddress,
     subscription_data: {
       metadata: {
         clerkUserId: user.id,
@@ -89,8 +90,12 @@ export async function createCheckoutSession(tier: PaidTierNames) {
     return;
   }
 
-  if (!subscription.stripeCustomerId) {
-    const url = await getCheckoutSession(tier, user);
+  if (!subscription.stripeSubscriptionId) {
+    const stripeCustomerId = subscription.stripeCustomerId
+      ? subscription.stripeCustomerId
+      : undefined;
+
+    const url = await getCheckoutSession(tier, user, stripeCustomerId);
     if (!url) {
       return;
     }
