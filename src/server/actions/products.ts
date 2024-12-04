@@ -7,6 +7,7 @@ import { auth } from '@clerk/nextjs/server';
 import {
   updateProductCustomization as updateProductCustomizationDB,
 } from '@/repositories/customization';
+import { removeTrailingSlash } from '@/lib/utils';
 import {
   createProduct as createProductDB,
   deleteProduct as deleteProductDB,
@@ -46,6 +47,8 @@ export async function updateProduct(
   if (!success || !userId) {
     return { error: true, message: errorMessage };
   }
+
+  data.url = removeTrailingSlash(data.url);
 
   const isSuccess = await updateProductDB(data, { id, userId });
 
